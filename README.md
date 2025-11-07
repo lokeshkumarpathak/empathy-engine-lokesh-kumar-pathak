@@ -1,4 +1,4 @@
-markdown# 🎙️ The Empathy Engine  
+🎙️ The Empathy Engine  
 ### Giving AI a Human Voice — with Emotional Resonance
 
 ---
@@ -303,5 +303,6 @@ python cli.py "Your text here"
 
 ---
 
-💬 **"The goal isn't just to make AI speak — it's to make it care how it sounds."**#   e m p a t h y _ e n g i n e _ l o k e s h _ k u m a r _ p a t h a k  
+💬 **"The goal isn't just to make AI speak — it's to make it care how it sounds."**#   e m p a t h y _ e n g i n e _ l o k e s h _ k u m a r _ p a t h a k 
+ 
  
