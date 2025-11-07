@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙️ The Empathy Engine - AI Voice with Emotion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .example-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .example-btn {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .emotion-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.3em;
+            margin: 15px 0;
+            text-transform: capitalize;
+        }
+
+        .emotion-joy { background: #ffeaa7; color: #fdcb6e; }
+        .emotion-sadness { background: #74b9ff; color: #0984e3; }
+        .emotion-anger { background: #ff7675; color: #d63031; }
+        .emotion-fear { background: #a29bfe; color: #6c5ce7; }
+        .emotion-surprise { background: #fd79a8; color: #e84393; }
+        .emotion-disgust { background: #55efc4; color: #00b894; }
+        .emotion-neutral { background: #dfe6e9; color: #636e72; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card h3 {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .info-card p {
+            color: #333;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .audio-player {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .emotion-breakdown {
+            margin-top: 20px;
+        }
+
+        .emotion-bar {
+            margin: 10px 0;
+        }
+
+        .emotion-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .emotion-bar-fill {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .emotion-bar-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease-out;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .error-message {
+            background: #ff7675;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ The Empathy Engine</h1>
+        <p class="subtitle">AI Voice Synthesis with Emotional Intelligence</p>
+
+        <div class="input-section">
+            <label for="textInput">Enter Your Text:</label>
+            <textarea 
+                id="textInput" 
+                placeholder="Type anything... The AI will detect the emotion and speak with feeling!"
+            ></textarea>
+            
+            <div class="example-buttons">
+                <button class="example-btn" onclick="setExample('I just got the promotion I\'ve been working towards for years! This is incredible!')">Sample-1</button>
+                <button class="example-btn" onclick="setExample('I can\'t believe they cancelled the project after all our hard work.')">Sample-2</button>
+                <button class="example-btn" onclick="setExample('This is completely unacceptable! I demand to speak with a manager immediately!')">Sample-3</button>
+                <button class="example-btn" onclick="setExample('Did you hear that noise? I think someone\'s outside...')">Sample-4</button>
+                <button class="example-btn" onclick="setExample('Wait, you\'re telling me we won the lottery?!')">Sample-5</button>
+                <button class="example-btn" onclick="setExample('That food smells absolutely rotten. I think I\'m going to be sick.')">Sample-6</button>
+                <button class="example-btn" onclick="setExample('The meeting is scheduled for 3 PM in conference room B.')">Sample-7</button>
+            </div>
+        </div>
+
+        <button class="analyze-btn" onclick="analyzeText()">
+            🎤 Analyze & Generate Voice
+        </button>
+
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Detecting emotion and synthesizing speech...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="results" id="results">
+            <h2 style="color: #667eea; margin-bottom: 20px;">🎯 Analysis Results</h2>
+            
+            <div style="text-align: center;">
+                <div id="emotionBadge" class="emotion-badge"></div>
+                <p id="emotionDescription" style="font-style: italic; color: #666; margin-top: 10px;"></p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Confidence</h3>
+                    <p id="confidence">-</p>
+                </div>
+                <div class="info-card">
+                    <h3>Intensity</h3>
+                    <p id="intensity">-</p>
+                </div>
+                <div class="info-card">
+                    <h3>Speech Rate</h3>
+                    <p id="rate">- wpm</p>
+                </div>
+                <div class="info-card">
+                    <h3>Pitch Level</h3>
+                    <p id="pitch">-</p>
+                </div>
+            </div>
+
+            <div class="audio-player">
+                <h3 style="color: #667eea; margin-bottom: 10px;">🔊 Generated Audio</h3>
+                <audio id="audioPlayer" controls></audio>
+            </div>
+
+            <div class="emotion-breakdown">
+                <h3 style="color: #667eea; margin-bottom: 15px;">📊 Emotion Breakdown</h3>
+                <div id="emotionBars"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Built with ❤️ using Transformers + Flask + pyttsx3</p>
+        <p>AI Hackathon Project - Darwix AI</p>
+    </div>
+
+    <script>
+        function setExample(text) {
+            document.getElementById('textInput').value = text;
+        }
+
+        async function analyzeText() {
+            const text = document.getElementById('textInput').value.trim();
+            
+            if (!text) {
+                showError('Please enter some text first!');
+                return;
+            }
+
+            // Show loading, hide results and errors
+            document.querySelector('.loading').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
+            document.querySelector('.analyze-btn').disabled = true;
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Analysis failed');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                document.querySelector('.loading').classList.remove('active');
+                document.querySelector('.analyze-btn').disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            // Set emotion badge
+            const badge = document.getElementById('emotionBadge');
+            badge.textContent = data.emotion;
+            badge.className = 'emotion-badge emotion-' + data.emotion;
+
+            // Set description
+            document.getElementById('emotionDescription').textContent = data.description;
+
+            // Set metrics
+            document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(1) + '%';
+            document.getElementById('intensity').textContent = data.intensity.toFixed(2) + 'x';
+            document.getElementById('rate').textContent = data.voice_parameters.rate + ' wpm';
+            document.getElementById('pitch').textContent = data.voice_parameters.pitch;
+
+            // Set audio
+            const audio = document.getElementById('audioPlayer');
+            audio.src = '/audio/' + data.audio_file;
+
+            // Create emotion bars
+            const barsContainer = document.getElementById('emotionBars');
+            barsContainer.innerHTML = '';
+            
+            data.all_emotions.forEach(emotion => {
+                const barHTML = `
+                    <div class="emotion-bar">
+                        <div class="emotion-bar-label">
+                            <span style="text-transform: capitalize;">${emotion.emotion}</span>
+                            <span>${(emotion.score * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="emotion-bar-fill">
+                            <div class="emotion-bar-progress" style="width: ${emotion.score * 100}%"></div>
+                        </div>
+                    </div>
+                `;
+                barsContainer.innerHTML += barHTML;
+            });
+
+            // Show results
+            document.getElementById('results').classList.add('active');
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = '❌ ' + message;
+            errorEl.classList.add('active');
+            
+            setTimeout(() => {
+                errorEl.classList.remove('active');
+            }, 5000);
+        }
+
+        // Allow Enter key to submit (Ctrl+Enter for new line)
+        document.getElementById('textInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                e.preventDefault();
+                analyzeText();
+            }
+        });
+    </script>
+</body>
+</html>
